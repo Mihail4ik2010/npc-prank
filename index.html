@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Security Alert</title>
+  <style>
+    /* минимальный красный «паник»-интерфейс */
+    :root{--bg:#7f0000;--dark:#4a0000;--txt:#fff}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+    body{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(180deg,var(--bg),var(--dark));
+      color:var(--txt);
+    }
+    .box{
+      width:min(940px,95vw);
+      max-width:980px;
+      background:rgba(0,0,0,0.08);
+      border-radius:12px;
+      padding:28px;
+      box-shadow:0 12px 40px rgba(0,0,0,0.5);
+      text-align:left;
+    }
+    h1{margin:0;font-size:28px;letter-spacing:0.6px}
+    .sub{margin-top:8px;color:rgba(255,255,255,0.88)}
+    .warning{
+      display:flex;
+      gap:16px;
+      margin-top:20px;
+      align-items:center;
+    }
+    .badge{
+      background:linear-gradient(90deg,#ff3b3b,#ff8a8a);
+      padding:10px 14px;border-radius:10px;font-weight:700;
+      box-shadow:0 6px 20px rgba(255,60,60,0.15);
+    }
+    .timer{
+      margin-left:auto;
+      font-family:monospace;
+      font-size:34px;
+      font-weight:700;
+      letter-spacing:1px;
+    }
+    .details{
+      margin-top:18px;
+      background:rgba(0,0,0,0.12);
+      padding:14px;border-radius:8px;color:rgba(255,255,255,0.95);
+    }
+    .cta{
+      margin-top:16px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .btn{
+      padding:10px 14px;border-radius:10px;background:#00000022;border:1px solid rgba(255,255,255,0.08);
+      color:var(--txt);text-decoration:none;font-weight:600;
+    }
+    .small{font-size:13px;color:rgba(255,255,255,0.75);margin-top:8px}
+    /* мобильный упрощённый стиль */
+    @media (max-width:560px){
+      .box{padding:18px}
+      h1{font-size:20px}
+      .timer{font-size:26px}
+    }
+  </style>
+</head>
+<body>
+  <div class="box" role="main" aria-live="polite">
+    <div style="display:flex;align-items:center;gap:16px">
+      <div>
+        <h1>SECURITY ALERT</h1>
+        <div class="sub">Неавторизованная активность обнаружена на устройстве</div>
+      </div>
+    </div>
+
+    <div class="warning">
+      <div class="badge">CRITICAL</div>
+      <div class="details" style="flex:1">
+        <div style="font-weight:700">Система безопасности: Нарушена</div>
+        <div class="small">Подозрительная сессия недавно инициирована. Рекомендуется немедленно сохранить данные и связаться с администратором.</div>
+      </div>
+      <div class="timer" id="timer">00:00</div>
+    </div>
+
+    <div class="cta">
+      <a class="btn" id="dismiss">Это шутка</a>
+      <a class="btn" id="more">Показать детали</a>
+    </div>
+
+    <div class="small" id="extra">Если вы не знаете источник активности — перезагрузите устройство и проверьте настройки безопасности.</div>
+  </div>
+
+  <script>
+    // Настройки: сколько секунд отсчёта
+    const countdownSeconds = 45; // <- измените по желанию
+
+    let remaining = countdownSeconds;
+    const timerEl = document.getElementById('timer');
+
+    function formatTime(s){
+      const mm = Math.floor(s/60).toString().padStart(2,'0');
+      const ss = (s%60).toString().padStart(2,'0');
+      return mm + ':' + ss;
+    }
+
+    timerEl.textContent = formatTime(remaining);
+
+    const interval = setInterval(()=> {
+      remaining--;
+      if(remaining < 0){
+        clearInterval(interval);
+        timerEl.textContent = "00:00";
+        // действие по окончании: мигающий фон и сообщение
+        document.body.style.animation = "pulse 0.8s infinite";
+        // краткое всплытие
+        const p = document.createElement('div');
+        p.style.position='fixed';
+        p.style.left='50%';
+        p.style.top='50%';
+        p.style.transform='translate(-50%,-50%)';
+        p.style.background='rgba(0,0,0,0.75)';
+        p.style.color='white';
+        p.style.padding='18px 22px';
+        p.style.borderRadius='12px';
+        p.style.fontWeight=700;
+        p.style.zIndex=9999;
+        p.textContent='Автоматическое действие: сессия завершена';
+        document.body.appendChild(p);
+        setTimeout(()=> p.remove(), 4000);
+      } else {
+        timerEl.textContent = formatTime(remaining);
+      }
+    }, 1000);
+
+    // кнопки — чисто косметика
+    document.getElementById('dismiss').addEventListener('click', function(){
+      // закрыть страницу — попытка вернуться назад
+      try { history.back(); } catch(e){ window.close(); }
+    });
+    document.getElementById('more').addEventListener('click', function(){
+      alert("Подробности: фальшивый лог для шутки. Никаких данных не украдено.");
+    });
+
+    // лёгкая анимация фона (CSS-in-JS)
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes pulse {
+        0%{filter:brightness(1)}
+        50%{filter:brightness(1.25)}
+        100%{filter:brightness(1)}
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>
